@@ -1,4 +1,4 @@
-all : myls myio mystdio
+all : myls myio mystdio hello
 myls : myls.o
 	gcc -o myls myls.o
 myls.o : myls.c
@@ -11,5 +11,9 @@ mystdio : mystdio.o
 	gcc -o mystdio mystdio.o
 mystdio.o : mystdio.c
 	gcc -g -c mystdio.c
+hello : hello.o
+	gcc -o hello hello.o
+hello.o : hello.c
+	gcc -g -c hello.c
 clean :
-	rm -rf myls myio mystdio *.o
+	rm -rf myls myio mystdio hello *.o
