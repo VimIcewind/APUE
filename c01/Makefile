@@ -1,4 +1,4 @@
-all : myls myio mystdio hello shell1 testerror
+all : myls myio mystdio hello shell1 testerror uidgid
 
 myls : myls.o
 	gcc -o myls myls.o
@@ -24,5 +24,9 @@ testerror : testerror.o
 	gcc -o testerror testerror.o
 testerror.o : testerror.c
 	gcc -g -c testerror.c
+uidgid : uidgid.o
+	gcc -o uidgid uidgid.o
+uidgid.o : uidgid.c
+	gcc -g -c uidgid.c
 clean :
-	rm -rf myls myio mystdio hello shell1 testerror *.o
+	rm -rf myls myio mystdio hello shell1 testerror uidgid *.o
