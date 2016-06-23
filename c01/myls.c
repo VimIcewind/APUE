@@ -1,7 +1,6 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include "ourhdr.h"
-#include "ourerr.h"
 
 int main(int argc, char *argv[])
 {

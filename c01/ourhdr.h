@@ -3,11 +3,13 @@
 #ifndef __ourhdr_h
 #define __ourhdr_h
 
-#include <sys/types.h> /* required for some of our prototypes */
-#include <stdio.h>     /* for convenience */
-#include <stdlib.h>    /* for convenience */
-#include <string.h>    /* for convenience */
-#include <unistd.h>    /* for convenience */
+#include <sys/types.h>	/* required for some of our prototypes */
+#include <stdio.h>	/* for convenience */
+#include <stdlib.h>	/* for convenience */
+#include <string.h>	/* for convenience */
+#include <unistd.h>	/* for convenience */
+#include <errno.h>	/* for definition of errno */
+#include <stdarg.h>	/* ANSI C header file */
 
 #define MAXLINE 4096  /* max line length */
 #define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
@@ -100,5 +102,88 @@ void	TELL_PARENT(pid_t);
 void	TELL_CHILD(pid_t);
 void	WAIT_PARENT(void);
 void	WAIT_CHILD(void);
+
+static void err_doit(int, const char *, va_list);
+char	*pname = NULL;	/* caller can set this from argv[0] */
+
+/* Nonfatal error related to a system call.
+ * Print a message and return. */
+
+void err_ret(const char *fmt, ...)
+{
+	va_list	ap;
+	va_start(ap, fmt);
+	err_doit(1, fmt, ap);
+	va_end(ap);
+	return;
+}
+
+/* Fatal error related to a system call.
+ * Print a message and terminate. */
+
+void err_sys(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	err_doit(1, fmt, ap);
+	va_end(ap);
+	exit(1);
+}
+
+/* Fatal error related to a system call.
+ * Print a message, dump core, and terminate. */
+
+void err_dump(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	err_doit(1, fmt, ap);
+	va_end(ap);
+	abort();	/* dump core and terminate */
+	exit(1);	/* shouldn't get here */
+}
+
+/* Nofatal error unrelated to a system call.
+ * Print a message and return. */
+
+void err_msg(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	err_doit(0, fmt, ap);
+	va_end(ap);
+	return;
+}
+
+/* fatal error unrelated to a system call.
+ * Print a message and terminate. */
+
+void err_quit(const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	err_doit(0, fmt, ap);
+	va_end(ap);
+	exit(1);
+}
+
+/* Print a message and return to caller.
+ * Caller specifies "errnoflag". */
+
+static void err_doit(int errnoflag, const char *fmt, va_list ap)
+{
+	int errno_save;
+	char buf[MAXLINE];
+
+	errno_save = errno;	/* value caller might want printed */
+	vsprintf(buf, fmt, ap);
+	if (errnoflag)
+		sprintf(buf+strlen(buf), ": %s", strerror(errno_save));
+	strcat(buf, "\n");
+	fflush(stdout);		/* in case stdout and stderr are the same */
+	fputs(buf, stderr);
+	fflush(NULL);		/* flushes all stdio output streams */
+	return;
+}
 
 #endif /* __ourhdr_h */
